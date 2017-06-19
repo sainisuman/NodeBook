@@ -1,0 +1,17 @@
+{
+  "name": "nodebook",
+  "version": "1.0.0",
+  "description": "NodeBook - Social Networking Site",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Suman Saini",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "mongoose": "^4.10.6"
+  }
+}

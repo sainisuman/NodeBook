@@ -1,0 +1,36 @@
+.nb-no-pad {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.note {
+    border: 1px solid black;
+    padding: 20px;
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+.nb-new-note {
+    resize: none;
+}
+
+.nb-node-date {
+    color: gray;
+    font-size: 10px;
+}
+
+.nb-right {
+    float : right;
+}
+
+.nb-pointer {
+    cursor: pointer;
+}
+
+.nb-control {
+    margin-top: 4px;
+}
+
+.nb-f-thick {
+    font-weight: bold;
+}
