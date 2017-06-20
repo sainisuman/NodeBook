@@ -5,8 +5,11 @@ var mongoose = require('mongoose');
 var noteModel = require('./models/notes');
 var userModel = require('./models/users');
 var bcrypt = require('bcryptjs');
+var jwt = require('jwt-simple');
 
 var app = express();
+
+var JWT_SECRET = 'maverick';
 
 var urlencodedParser = bodyparser.urlencoded({ extended: false });
 
@@ -48,8 +51,15 @@ app.get('/notes', (req, res, next)=>{
 })
 
 app.post('/notes', urlencodedParser ,(req, res, next)=>{
-    var newNote = noteModel({noteText: req.body.newNote}).save((err,data)=>{
-        res.send(data);
+    var token = req.headers.authorization;
+    var user = jwt.decode(token, JWT_SECRET);
+    
+    var newNote = noteModel({
+        noteText: req.body.newNote,
+        noteUser: user._id,
+        noteUserEmail: user.userEmail
+    }).save((err,data)=>{
+        res.send(data); // Sends entire note object
     })
     
 })
@@ -78,7 +88,8 @@ app.put('/users/signin', (req, res, next)=>{
     userModel.findOne({userEmail: req.body.userEmail}, (err, user)=>{
         bcrypt.compare(req.body.userPass, user.userPass, (err, result)=>{
             if (result) {
-                return res.send();
+                var token = jwt.encode(user, JWT_SECRET);
+                return res.json({token: token});
             } 
             else {
                 return res.status(400).send();

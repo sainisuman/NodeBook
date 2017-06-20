@@ -12,6 +12,7 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
+    "jwt-simple": "^0.5.1",
     "mongoose": "^4.10.6"
   }
 }

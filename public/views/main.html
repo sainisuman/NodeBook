@@ -1,6 +1,6 @@
 <div class="row">
             <div class="col-md-4">
-                <div class="panel panel-info">
+                <div ng-hide="currentUser" class="panel panel-info">
                     <div class="panel-heading">
                         <div class="panel-title">Login:</div>
                     </div>
@@ -31,17 +31,22 @@
                         </form>
                     </div>
                 </div>
+                <div ng-show="currentUser">
+                    <h2>Hello, {{currentUser}}</h2>
+                    <div class="nb-font-medium nb-pointer" ng-show="currentUser" ng-click="logout()">Logout</div>
+                </div>
             </div>
             <div class="col-md-8">
-                <form>
+                <form ng-show="currentUser">
                     <textarea name="nb-new-note" id="nb-new-note" rows="2" class="form-control" ng-model="nbNewNote" placeholder="Tell us what you think..."></textarea>
                     <br>
                     <button class="btn btn-primary" type="submit" ng-click="nbNoteSubmit()">Post</button>
                 </form>
                 <div class="note" ng-repeat="note in notes">
                     <h3><i class="fa fa-user"></i> {{note.noteText}} 
-                        <span ng-click="nbRemoveNote(note)" class="glyphicon glyphicon-remove nb-right nb-pointer"></span>
+                        <span ng-show="validateUser(note.noteUserEmail)" ng-click="nbRemoveNote(note)" class="glyphicon glyphicon-remove nb-right nb-pointer"></span>
                     </h3>
+                    <p> {{note.noteUserEmail}} </p>
                     <p class="nb-note-date">{{note.noteDate}}</p>
                 </div>
                 
