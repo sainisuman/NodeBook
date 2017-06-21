@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <base href="/">
         <title>NodeBook</title>
         <!--<link rel="stylesheet" type="text/css" href="https://bootswatch.com/united/bootstrap.min.css">-->
         <!-- Latest compiled and minified CSS -->
@@ -10,6 +11,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
         <!-- Latest compiled and minified JavaScript --><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-route.js"></script>
@@ -20,7 +22,7 @@
     </head>
     <body ng-app="nodebook">
         <div class="container">
-            <h1><a href="#/">NodeBook</a>
+            <h1><a href="/">NodeBook</a>
             </h1>
             <div ng-view></div>
         </div>

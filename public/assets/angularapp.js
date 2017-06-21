@@ -10,7 +10,16 @@ nodebook.config(function($routeProvider, $locationProvider){
         .when('/signup',{
             templateUrl: 'views/signup.html',
             controller: 'signupController'
+        })
+        .when('/404', {
+            templateUrl: 'views/404.html'
+        })
+        .otherwise({
+            redirectTo: '/404'
         });
+        
+
+        $locationProvider.html5Mode(true);
 });
 
 nodebook.run(function($rootScope, $cookies){
@@ -21,6 +30,16 @@ nodebook.run(function($rootScope, $cookies){
 });
 
 nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope){
+    var socket = io();
+    socket.on('changeinNote', function(){
+        getNotes();
+    });
+
+    socket.on('popChat', function(data){
+        console.log('called');
+        $http.put('/chat', data);
+    });
+
     $scope.nbNoteSubmit = function(){
         $http.post('/notes', 
                     {newNote: $scope.nbNewNote},
@@ -54,6 +73,18 @@ nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope
     };
     
     getNotes();
+
+    var getUsers = function(){
+        $http.get('/users').then(function(res){
+            $scope.users = res.data;
+        });
+    };
+
+    getUsers();
+
+    $scope.startChat = function(targetUser){
+        socket.emit('popChat');
+    };
    
     $scope.signIn = function(){
         localStorage.setItem("cu", $scope.username);
@@ -71,6 +102,17 @@ nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope
 
     $scope.validateUser = function (userID) {
         return userID == localStorage.getItem("cu");
+    };
+
+    $scope.parseDate = function (input) {
+  var parts = input.match(/(\d+)/g);
+  // new Date(year, month [, date [, hours[, minutes[, seconds[, ms]]]]])
+  var datetemp = new Date(parts[0], parts[1]-1, parts[2], parts[3], parts[4]); // months are 0-based
+  return (datetemp.getMonth() +1) + "/" + datetemp.getDay() + '/' + datetemp.getFullYear() + ' ' + datetemp.getHours() + ":" + datetemp.getMinutes();
+}
+
+    $scope.nbDateFormat = function(noteDate) {
+        return $scope.parseDate(noteDate);
     };
 
 });

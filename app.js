@@ -9,6 +9,18 @@ var jwt = require('jwt-simple');
 
 var app = express();
 
+var server = require('http').createServer(app);
+var io = require('socket.io').listen(server);
+
+// server.listen(process.env.PORT || 3000);
+
+io.on("connection", function(socket){
+    // console.log(socket.handshake.headers);
+    console.log('New Client connected');
+});
+
+var port = process.env.PORT || 3000;
+
 var JWT_SECRET = 'maverick';
 
 var urlencodedParser = bodyparser.urlencoded({ extended: false });
@@ -38,6 +50,17 @@ app.use(bodyparser.json());
 
 app.use(express.static(path.join(__dirname, '/public')));
 
+var authorized = function(req, res, next){
+    var token = req.headers.authorization;
+    var user = jwt.decode(token, JWT_SECRET);
+    req.user = user;
+    return next();
+};
+
+app.get('port', (req, res)=>{
+    res.send(listener.address().port);
+});
+
 app.get('/', (req, res)=>{
     res.sendFile(__dirname + '/index.html');
 });
@@ -48,17 +71,26 @@ app.get('/notes', (req, res, next)=>{
         res.send(data);
     });
     //res.send(notes);
-})
+});
 
-app.post('/notes', urlencodedParser ,(req, res, next)=>{
-    var token = req.headers.authorization;
-    var user = jwt.decode(token, JWT_SECRET);
+app.get('/users', (req, res, next)=>{
+    userModel.find({}, function(err, data){
+        if (err) throw err;
+        res.send(data);
+    });
+    //res.send(notes);
+});
+
+app.post('/notes', authorized ,(req, res, next)=>{
+    // var token = req.headers.authorization;
+    // var user = jwt.decode(token, JWT_SECRET);
     
     var newNote = noteModel({
         noteText: req.body.newNote,
-        noteUser: user._id,
-        noteUserEmail: user.userEmail
+        noteUser: req.user._id,
+        noteUserEmail: req.user.userEmail
     }).save((err,data)=>{
+        io.emit('changeinNote');
         res.send(data); // Sends entire note object
     })
     
@@ -70,6 +102,7 @@ app.delete('/note/:id', (req, res, next)=>{
         if(err) throw err;
         //console.log(data); data is entire object here
     });
+    io.emit('changeinNote');
     res.send('Item Deleted');
 });
 
@@ -98,6 +131,18 @@ app.put('/users/signin', (req, res, next)=>{
     });
 });
 
-app.listen(process.env.PORT, function(){
-    console.log("Server listening at port 3000");
-})
+app.put('/chat', (req, res, next)=>{
+    console.log('lk');
+});
+
+app.get('*', (req, res, next)=>{
+    return res.redirect('/#'+ req.originalUrl);
+});
+
+// app.listen(port, function(){
+//     console.log("Server listening at port: " + listener.address().port);
+// });
+
+server.listen(port, function(){
+    console.log("Server listening at port: " + port);
+});

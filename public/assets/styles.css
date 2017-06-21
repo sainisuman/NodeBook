@@ -38,3 +38,8 @@
 .nb-font-medium {
     font-size: medium;
 }
+
+.nb-chat-body {
+    height: 200px;
+    overflow-y: scroll;
+}

@@ -27,15 +27,48 @@
                         </div>
                         
                         <button ng-click="signIn()" class="btn btn-primary">Sign In</button>
-                        <a href="#signup">Not a member? Sign up!</a>
+                        <a href="/signup">Not a member? Sign up!</a>
                         </form>
                     </div>
                 </div>
                 <div ng-show="currentUser">
                     <h2>Hello, {{currentUser}}</h2>
                     <div class="nb-font-medium nb-pointer" ng-show="currentUser" ng-click="logout()">Logout</div>
+                    <br>
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                        <div class="panel-title">Chat</div>
+                    </div>
+                    <div class="panel-body">
+                        <ul>
+                            <li ng-repeat="user in users" 
+                                ng-if="user.userEmail != currentUser"
+                                ng-click="startChat(user._id)">
+                                {{user.userEmail}}
+                            </li>
+                        </ul>
+                    </div>
+                    </div>
+                    <hr>
+                    <div ng-show="!showChatWindow(targetUser)">
+                        <div class="panel panel-info">
+                        <div class="panel-heading">
+                        <div class="panel-title">{{targetUser}}</div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="nb-chat-body"></div>
+                        <form>
+                            <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Enter the message">
+                            <span class="input-group-addon">Send</span>
+                            </div>
+                        </form>
+                    </div>
+                    </div>
+                    </div>
                 </div>
             </div>
+            
             <div class="col-md-8">
                 <form ng-show="currentUser">
                     <textarea name="nb-new-note" id="nb-new-note" rows="2" class="form-control" ng-model="nbNewNote" placeholder="Tell us what you think..."></textarea>
@@ -47,7 +80,7 @@
                         <span ng-show="validateUser(note.noteUserEmail)" ng-click="nbRemoveNote(note)" class="glyphicon glyphicon-remove nb-right nb-pointer"></span>
                     </h3>
                     <p> {{note.noteUserEmail}} </p>
-                    <p class="nb-note-date">{{note.noteDate}}</p>
+                    <p class="nb-note-date">{{ nbDateFormat(note.noteDate)}}</p>
                 </div>
                 
             </div>
