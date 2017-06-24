@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <div ng-show="currentUser">
-                    <h2>Hello, {{currentUser}}</h2>
+                    <h2>Hello, {{userFirstName}}</h2>
                     <div class="nb-font-medium nb-pointer" ng-show="currentUser" ng-click="logout()">Logout</div>
                     <br>
                     <div class="panel panel-info">
@@ -41,31 +41,59 @@
                     </div>
                     <div class="panel-body">
                         <ul>
+                            <li ng-click="nbShowCR()">Chat Room</li>
                             <li ng-repeat="user in users" 
                                 ng-if="user.userEmail != currentUser"
                                 ng-click="startChat(user._id)">
-                                {{user.userEmail}}
+                                {{user.userFirstName}}
                             </li>
                         </ul>
                     </div>
                     </div>
                     <hr>
-                    <div ng-show="!showChatWindow(targetUser)">
-                        <div class="panel panel-info">
+                    <div ng-show="nbShowChatP2P" class="chat-room-window nb-pad-r">
+                        <div class="panel panel-info nb-no-margin-b">
                         <div class="panel-heading">
-                        <div class="panel-title">{{targetUser}}</div>
+                        <div class="panel-title">
+                            <span class="glyphicon glyphicon-remove nb-right" ng-click="nbp2pClose()"></span> 
+                            <span class="fa fa-window-maximize nb-right nb-padding-minus" ng-click="nbp2pMaximize()" ></span> 
+                            <span class="glyphicon glyphicon-minus nb-right nb-padding-minus" ng-click="nbp2pMinimize()" ></span> 
+                        </div>
                     </div>
-                    <div class="panel-body">
-                        <div class="nb-chat-body"></div>
-                        <form>
+                    <div ng-show="nbp2pChatBody" class="panel-body" id="nb_gc_body">
+                        <div id="p2p_chat_body" class="nb-chat-body"></div>
+                        <form ng-submit="p2pChatSend()">
+                            <div id="broadcastP2pChat" class="nb-broadcast-style"></div>
                             <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Enter the message">
-                            <span class="input-group-addon">Send</span>
+                            <input type="text" ng-keypress="broadcastP2p()" class="form-control" ng-model="p2pChatMsg" placeholder="Enter the message">
+                            <span ng-click="p2pChatSend()" class="input-group-addon">Send</span>
                             </div>
                         </form>
                     </div>
                     </div>
                     </div>
+                    <div ng-show="nbShowChatRoom" class="chat-room-window nb-pad-r">
+                        <div class="panel panel-info nb-no-margin-b">
+                        <div class="panel-heading">
+                        <div class="panel-title">Chat Room  
+                            <span class="glyphicon glyphicon-remove nb-right" ng-click="nbGcClose()"></span> 
+                            <span class="fa fa-window-maximize nb-right nb-padding-minus" ng-click="nbGcMaximize()" ></span> 
+                            <span class="glyphicon glyphicon-minus nb-right nb-padding-minus" ng-click="nbGcMinimize()" ></span> 
+                        </div>
+                    </div>
+                    <div ng-show="nbGcChatBody" class="panel-body" id="nb_gc_body">
+                        <div id="group_chat_body" class="nb-chat-body"></div>
+                        <form ng-submit="groupChatSend()">
+                            <div id="broadcastGroupChat" class="nb-broadcast-style"></div>
+                            <div class="input-group">
+                            <input type="text" ng-keypress="broadcastGC()" class="form-control" ng-model="groupChatMsg" placeholder="Enter the message">
+                            <span ng-click="groupChatSend()" class="input-group-addon">Send</span>
+                            </div>
+                        </form>
+                    </div>
+                    </div>
+                    </div>
+
                 </div>
             </div>
             

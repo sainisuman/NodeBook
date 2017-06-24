@@ -17,6 +17,13 @@ var io = require('socket.io').listen(server);
 io.on("connection", function(socket){
     // console.log(socket.handshake.headers);
     console.log('New Client connected');
+    socket.on('groupChat', function(data){
+        io.sockets.emit('groupChat', data);
+    });
+
+    socket.on('typing', function(data){
+        socket.broadcast.emit('typing', data);
+    });
 });
 
 var port = process.env.PORT || 3000;
@@ -66,7 +73,10 @@ app.get('/', (req, res)=>{
 });
 
 app.get('/notes', (req, res, next)=>{
-    noteModel.find({}, function(err, data){
+    noteModel
+    .find({})
+    .sort('-noteDate')
+    .exec(function(err, data){
         if (err) throw err;
         res.send(data);
     });
@@ -74,12 +84,21 @@ app.get('/notes', (req, res, next)=>{
 });
 
 app.get('/users', (req, res, next)=>{
-    userModel.find({}, function(err, data){
+    userModel
+    .find({})
+    .sort('userFirstName')
+    .exec(function(err, data){
         if (err) throw err;
         res.send(data);
     });
     //res.send(notes);
 });
+
+app.post('/chat' ,(req, res, next)=>{
+        io.emit('chatInitiated');
+        console.log(req.body);
+        res.send({}); // Sends entire note object    
+})
 
 app.post('/notes', authorized ,(req, res, next)=>{
     // var token = req.headers.authorization;
@@ -94,7 +113,11 @@ app.post('/notes', authorized ,(req, res, next)=>{
         res.send(data); // Sends entire note object
     })
     
-})
+});
+
+app.put('/currentuser', authorized, (req, res, next)=>{
+    res.send(req.user);
+});
 
 app.delete('/note/:id', (req, res, next)=>{
     //console.log(req.params.id);
@@ -106,10 +129,24 @@ app.delete('/note/:id', (req, res, next)=>{
     res.send('Item Deleted');
 });
 
+app.put('/checkuser/:username', (req, res, next)=>{
+    userModel.findOne({userName: req.params.username}, function(err, user){
+        if(err) throw err;
+        else if (user) res.send({exists: true});
+        else res.send({exists: false});
+    })
+});
+
 app.post('/signup/createuser', (req, res, next)=>{
     // bcrypt.genSalt(10, (err, salt)=>{
         bcrypt.hash(req.body.userPass, 10, (err, hash)=>{
-            var newUser = userModel({userEmail: req.body.userEmail, userPass: hash}).save((err, data)=>{
+            var newUser = userModel({
+                userFirstName: req.body.userFirstName,
+                userLastName: req.body.userLastName,
+                userEmail: req.body.userEmail,
+                userName: req.body.userName, 
+                userPass: hash
+            }).save((err, data)=>{
         res.send('User Saved');
     })
         });
@@ -122,7 +159,7 @@ app.put('/users/signin', (req, res, next)=>{
         bcrypt.compare(req.body.userPass, user.userPass, (err, result)=>{
             if (result) {
                 var token = jwt.encode(user, JWT_SECRET);
-                return res.json({token: token});
+                return res.json({token: token, userFirstName: user.userFirstName});
             } 
             else {
                 return res.status(400).send();

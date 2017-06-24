@@ -1,4 +1,4 @@
-var nodebook = angular.module('nodebook',["ngRoute", "ngCookies"]);
+var nodebook = angular.module('nodebook',["ngRoute", "ngCookies","ngAnimate"]);
 
 nodebook.config(function($routeProvider, $locationProvider){
     $routeProvider
@@ -30,13 +30,56 @@ nodebook.run(function($rootScope, $cookies){
 });
 
 nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope){
+    $scope.getCurrentUser = function(){
+        var getu;
+        $http.put('/currentuser', {}, {headers: {
+                        'authorization': $rootScope.token
+                    }}).then(function(res){
+                        $cookies.put('cun', res.data.userFirstName);
+                        // return this.getu;
+                    });
+                    // console.log(getu);
+                    // return getu;
+    };
+    
+    $scope.getCurrentUser();
+    $scope.nbShowChatRoom = false;
+    $scope.nbGcChatBody = true;
+    $scope.nbShowChatP2P = false;
+    $scope.nbp2pChatBody = true;
+
+    $scope.startChat = function(targetUser){
+        $scope.nbShowChatP2P = true;
+        $http.post('/chat', {tu: targetUser});
+        // socket.emit('popChat');
+    };
+
+    $scope.nbShowCR = function(){
+        $scope.nbShowChatRoom = true;
+    };
+
+    $scope.nbGcClose = function(){
+        $scope.nbShowChatRoom = false;
+    };
+
+    $scope.nbGcMinimize = function(){
+        $scope.nbGcChatBody = false;
+    };
+
+    $scope.nbGcMaximize = function(){
+        $scope.nbGcChatBody = true;
+    };    
+
     var socket = io();
     socket.on('changeinNote', function(){
         getNotes();
     });
+    socket.on('chatInitiated', function(){
+        // console.log('At client side');
+    });
 
     socket.on('popChat', function(data){
-        console.log('called');
+        // console.log('called');
         $http.put('/chat', data);
     });
 
@@ -82,9 +125,7 @@ nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope
 
     getUsers();
 
-    $scope.startChat = function(targetUser){
-        socket.emit('popChat');
-    };
+    
    
     $scope.signIn = function(){
         localStorage.setItem("cu", $scope.username);
@@ -93,6 +134,7 @@ nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope
                 $cookies.put('token', res.data.token);
                 $cookies.put('currentUser', $scope.username);
                 $rootScope.token = res.data.token;
+                $rootScope.userFirstName = res.data.userFirstName;
                 $rootScope.currentUser = $scope.username;
                 // alert('Signed in Successfully');
             }, function(err){
@@ -115,16 +157,66 @@ nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope
         return $scope.parseDate(noteDate);
     };
 
+    
+
+    $scope.groupChatSend = function(){
+        // console.log('groupChatSend called');
+        socket.emit('groupChat',{
+            message: $scope.groupChatMsg,
+            handle: $cookies.get('cun')
+        });
+        $scope.groupChatMsg = '';
+        
+    };
+
+    socket.on('groupChat', function(data){
+        
+        angular.element('#group_chat_body').append(
+            '<p><strong>' + data.handle + ': </strong>' + data.message + '</p>'
+        );
+        angular.element('#broadcastGroupChat').html('');
+    });
+
+    $scope.broadcastGC = function(){
+        socket.emit('typing', $cookies.get('cun'));
+    };
+
+    socket.on('typing', function(data){
+        angular.element('#broadcastGroupChat').html('<p>' + data + ' is typing...</p>')
+    });
+    $scope.getUser = '';
+    
+    // console.log($scope.getUser);
+
 });
 
 nodebook.controller('signupController', function($scope, $http, $rootScope){
     $scope.nbNewUserSubmit = function(){
         var newUser = {
-            'userEmail': $scope.nbNewUser,
+            'userFirstName': $scope.nbSuFirstName,
+            'userLastName': $scope.nbSuLastName,
+            'userName': $scope.nbNewUser,
+            'userEmail': $scope.nbSuEmail,
             'userPass': $scope.nbNewPass
         }
         $http.post('/signup/createuser', newUser).then(function(data){
-            console.log(data);
+            // console.log(data);
         });
     }
+
+    $scope.validateUsername = function() {
+       
+       $http.put('/checkuser/' + $scope.nbNewUser).then(function(res){
+            // console.log(res);
+            $scope.result = res.data.exists;
+        });
+        // console.log($scope.result);
+        if($scope.result){
+        document.getElementById('userNameHelpBlock').innerHtml = "Username not available"
+        // document.findElementById('userNameHelpBlock').classList.add('MyClass');
+        }
+
+    };
 });
+
+angular.element('chat_body').html = "Hello guys";

@@ -4,18 +4,60 @@
         <div class="panel-title">Sign up here!</div>
     </div>
     <div class="panel-body">
-        <form>
-        <div class="row">
-        <div class="col-md-2 nb-control nb-f-thick">Username</div>
-        <div class="col-md-8">
-            <input type="text" class="form-control" ng-model="nbNewUser" placeholder="Enter an username" required>
-        </div>
-        </div>
+        <form id="signupForm" name="signupForm">
+            <div class="row">
+                <div class="form-group" ng-class="{'has-error' : (signupForm.nb_signup_firstname.$invalid && !signupForm.nb_signup_firstname.$pristine)}">
+                    <label for="nb_signup_firstname" class="col-md-3 nb-control nb-f-thick control-label">First Name</label>
+                    <div class="col-md-8 nb-no-pad">
+                        <input type="text" id="nb_signup_firstname" pattern="[A-Za-z]{1,30}" name="nb_signup_firstname" class="form-control" ng-model="nbSuFirstName" placeholder="First Name" required
+                        ng-maxlength="15">
+                        <span ng-show="signupForm.nb_signup_firstname.$invalid && !signupForm.nb_signup_firstname.$pristine" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+                        <p ng-show="signupForm.nb_signup_firstname.$error.required && !signupForm.nb_signup_firstname.$pristine" class="help-block">Your first name is required</p>
+                        <p ng-show="signupForm.nb_signup_firstname.$error.maxlength && !signupForm.nb_signup_firstname.$pristine" class="help-block">This field can have maximum of 15 characters</p>
+                        <p ng-show="signupForm.nb_signup_firstname.$error.pattern && !signupForm.nb_signup_firstname.$pristine" class="help-block">This character is invalid</p>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="form-group" ng-class="{'has-error' : (signupForm.nb_signup_lastname.$invalid && !signupForm.nb_signup_lastname.$pristine)}">
+                    <label for="nb_signup_lastname" class="col-md-3 nb-control nb-f-thick control-label">Last Name</label>
+                    <div class="col-md-8 nb-no-pad">
+                        <input type="text" id="nb_signup_lastname" pattern="[A-Za-z]{1,30}" class="form-control" name="nb_signup_lastname" ng-maxlength="15" ng-model="nbSuLastName" placeholder="Last Name" required>
+                        <span ng-show="signupForm.nb_signup_lastname.$invalid && !signupForm.nb_signup_lastname.$pristine" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+                        <p ng-show="signupForm.nb_signup_lastname.$error.required && !signupForm.nb_signup_lastname.$pristine" class="help-block">Your last name is required</p>
+                        <p ng-show="signupForm.nb_signup_lastname.$error.maxlength && !signupForm.nb_signup_lastname.$pristine" class="help-block">This field can have maximum of 15 characters</p>
+                        <p ng-show="signupForm.nb_signup_lastname.$error.pattern && !signupForm.nb_signup_lastname.$pristine" class="help-block">This character is invalid</p>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="form-group" ng-class="{'has-error' : (signupForm.nb_signup_email.$invalid && !signupForm.nb_signup_email.$pristine)}">
+                    <label for="nb_signup_email" class="col-md-3 nb-control nb-f-thick control-label">Email</label>
+                    <div class="col-md-8 nb-no-pad">
+                        <input type="email" id="nb_signup_email" name="nb_signup_email" class="form-control" ng-model="nbSuEmail" placeholder="Email" required>
+                         <span ng-show="signupForm.nb_signup_email.$invalid && !signupForm.nb_signup_email.$pristine" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>                       
+                        <p ng-show="signupForm.nb_signup_email.$error.required && !signupForm.nb_signup_email.$pristine" class="help-block">Your email is required</p>
+                        <p ng-show="signupForm.nb_signup_email.$error.email && !signupForm.nb_signup_email.$pristine" class="help-block">Invalid email</p>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+            <div class="form-group">
+                    <label for="nb_signup_username" class="col-md-3 nb-control nb-f-thick control-label">Username</label>
+                    <div class="col-md-8 nb-no-pad">
+                        <input type="text" name="username" id="nb_signup_username" class="form-control" ng-model="nbNewUser" placeholder="Enter an username" required>
+                        <!--<p id="userNameHelpBlock" class="help-block"></p>-->
+                    </div>
+                </div>
+            </div>
         <br>
         <div class="row">
-            <div class="col-md-2 nb-control nb-f-thick">Password</div>
-            <div class="col-md-8">
-            <input type="password" class="form-control" ng-model="nbNewPass" placeholder="Enter a password" required>
+            <div class="col-md-3 nb-control nb-f-thick">Password</div>
+            <div class="col-md-8 nb-no-pad">
+            <input type="password" name="password" class="form-control" ng-model="nbNewPass" placeholder="Enter a password" required>
         </div>
         </div>
         <br>

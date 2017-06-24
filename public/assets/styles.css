@@ -8,6 +8,7 @@
     padding: 20px;
     margin-bottom: 5px;
     margin-top: 5px;
+    z-index: 0;
 }
 
 .nb-new-note {
@@ -41,5 +42,32 @@
 
 .nb-chat-body {
     height: 200px;
-    overflow-y: scroll;
+    overflow-y: auto;
+    word-wrap: break-word;
+}
+
+.nb-broadcast-style {
+    font-style: italic;
+    height: 25px;
+}
+
+.chat-room-window {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    /*float: right;*/
+    width: 300px;
+    z-index: 1;
+}
+
+.nb-padding-minus {
+    padding-right: 10px;
+}
+
+.nb-no-margin-b {
+    margin-bottom: 0px;
+}
+
+.nb-pad-r {
+    padding-right: 10px;
 }
