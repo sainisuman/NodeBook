@@ -47,12 +47,21 @@ nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope
     $scope.nbGcChatBody = true;
     $scope.nbShowChatP2P = false;
     $scope.nbp2pChatBody = true;
-
-    $scope.startChat = function(targetUser){
+    $scope.nbShowChatWindoP2p = function(){
         $scope.nbShowChatP2P = true;
-        $http.post('/chat', {tu: targetUser});
+    };
+    $scope.startChat = function(targetUser, targetUserFirstName){
+
+        $scope.nbShowChatP2P = true;
+        angular.element('#p2pChatTitle').html(
+            targetUserFirstName + 
+            '<span class="glyphicon glyphicon-remove nb-right" ng-click="nbp2pClose()"></span> <span class="fa fa-window-maximize nb-right nb-padding-minus" ng-click="nbp2pMaximize()" ></span> <span class="glyphicon glyphicon-minus nb-right nb-padding-minus" ng-click="nbp2pMinimize()" ></span>'
+        );
+        socket.emit('p2pChat', {tu: targetUser, cu: $cookies.get('token')});
+        // $http.post('/chat', {tu: targetUser, cu: $cookies.get('token')});
         // socket.emit('popChat');
     };
+
 
     $scope.nbShowCR = function(){
         $scope.nbShowChatRoom = true;
@@ -62,12 +71,24 @@ nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope
         $scope.nbShowChatRoom = false;
     };
 
+    $scope.nbp2pClose = function(){
+        $scope.nbShowChatP2P = false;
+    };
+
     $scope.nbGcMinimize = function(){
         $scope.nbGcChatBody = false;
     };
 
     $scope.nbGcMaximize = function(){
         $scope.nbGcChatBody = true;
+    };
+
+    $scope.nbp2pMaximize = function(){
+        $scope.p2p_chat_body = true;
+    };
+
+    $scope.nbp2pMinimize = function(){
+        $scope.p2p_chat_body = false;
     };    
 
     var socket = io();
@@ -82,6 +103,46 @@ nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope
         // console.log('called');
         $http.put('/chat', data);
     });
+
+    socket.on('p2pconnect', function(data){
+        console.log('p2pconnect called');
+        console.log($cookies.get('currentUser'));
+        console.log(data.targeter);
+        console.log($cookies.get('currentUser') == data.targeter);
+        if( $cookies.get('currentUser') == data.targeter ){
+            console.log('executed');
+
+            $scope.$apply($scope.nbShowChatWindoP2p());
+            angular.element('#p2pChatTitle').html(
+            data.initiator + 
+            '<span class="glyphicon glyphicon-remove nb-right" ng-click="nbp2pClose()"></span> <span class="fa fa-window-maximize nb-right nb-padding-minus" ng-click="nbp2pMaximize()" ></span> <span class="glyphicon glyphicon-minus nb-right nb-padding-minus" ng-click="nbp2pMinimize()" ></span>'
+        );
+            // $scope.nbp2pChatBody = true;
+            // socket.join(data.room);
+            socket.emit('p2ptargetjoin', {room: data.room});
+            $scope.p2proom = data.room;
+        }
+        // $scope.p2proom = data.room;
+        // $scope.p2prooms['room'+data.room] = data.room;
+    });
+
+    socket.on('p2pmessage', function(data){
+        console.log('p2pmessage called');
+        angular.element('#p2p_chat_body').append(
+            '<p><strong>' + data.handle + ': </strong>' + data.message + '</p>'
+        );
+        angular.element('#broadcastGroupChat').html('');
+    });
+
+    $scope.p2pChatSend = function(){
+        console.log('$scope.p2proom : ' + $scope.p2proom);
+        socket.emit('p2pChatSend', {
+            room: $scope.p2proom,
+            message: $scope.p2pChatMsg,
+            handle: $cookies.get('cun')
+        });
+        $scope.p2pChatMsg = '';
+    };
 
     $scope.nbNoteSubmit = function(){
         $http.post('/notes', 
@@ -133,6 +194,7 @@ nodebook.controller('nbController', function($scope, $http, $cookies, $rootScope
             .then(function(res){
                 $cookies.put('token', res.data.token);
                 $cookies.put('currentUser', $scope.username);
+            
                 $rootScope.token = res.data.token;
                 $rootScope.userFirstName = res.data.userFirstName;
                 $rootScope.currentUser = $scope.username;

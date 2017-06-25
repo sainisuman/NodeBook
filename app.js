@@ -24,6 +24,37 @@ io.on("connection", function(socket){
     socket.on('typing', function(data){
         socket.broadcast.emit('typing', data);
     });
+
+    socket.on('p2pChat', function(data){
+        
+        var initiator = jwt.decode(data.cu, JWT_SECRET);
+        
+        // var room = data.tu + initiator._id;
+         var room = 'abc';
+        console.log('User joined')
+        socket.join(room);
+
+        userModel.findById(data.tu, function(err, target){
+            if(err) throw err;
+            io.sockets.emit('p2pconnect', {room: room, targeter: target.userEmail ,initiator: initiator.userFirstName});
+        });
+
+        
+    });
+
+    socket.on('p2ptargetjoin', function(data){
+        console.log('Target joined room '+ data.room);
+        socket.join(data.room);
+        var clients = io.sockets.adapter.rooms[data.room].sockets;
+        var numClients = (typeof clients !== 'undefined') ? Object.keys(clients).length : 0;
+        console.log('Number of users: ' + numClients);
+        console.log(clients);
+    });
+
+    socket.on('p2pChatSend', function(data){
+        console.log(data);
+        io.sockets.in('abc').emit('p2pmessage', {message: data.message, handle: data.handle});
+    });
 });
 
 var port = process.env.PORT || 3000;

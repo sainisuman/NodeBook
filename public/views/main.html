@@ -44,20 +44,22 @@
                             <li ng-click="nbShowCR()">Chat Room</li>
                             <li ng-repeat="user in users" 
                                 ng-if="user.userEmail != currentUser"
-                                ng-click="startChat(user._id)">
+                                ng-click="startChat(user._id, user.userFirstName)">
                                 {{user.userFirstName}}
                             </li>
                         </ul>
                     </div>
                     </div>
                     <hr>
-                    <div ng-show="nbShowChatP2P" class="chat-room-window nb-pad-r">
+                    <div ng-show="nbShowChatP2P" class="chat-room-window nb-pad-r" id="p2pchatwindow">
                         <div class="panel panel-info nb-no-margin-b">
                         <div class="panel-heading">
-                        <div class="panel-title">
-                            <span class="glyphicon glyphicon-remove nb-right" ng-click="nbp2pClose()"></span> 
+                        <div class="panel-title"><div id="p2pChatTitle">
+                            <!--<span class="glyphicon glyphicon-remove nb-right" ng-click="nbp2pClose()"></span> 
                             <span class="fa fa-window-maximize nb-right nb-padding-minus" ng-click="nbp2pMaximize()" ></span> 
-                            <span class="glyphicon glyphicon-minus nb-right nb-padding-minus" ng-click="nbp2pMinimize()" ></span> 
+                            <span class="glyphicon glyphicon-minus nb-right nb-padding-minus" ng-click="nbp2pMinimize()" ></span>-->
+                        </div>
+                             
                         </div>
                     </div>
                     <div ng-show="nbp2pChatBody" class="panel-body" id="nb_gc_body">
