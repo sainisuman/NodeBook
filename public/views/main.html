@@ -5,6 +5,11 @@
                         <div class="panel-title">Login:</div>
                     </div>
                     <div class="panel-body">
+                        <div ng-if="invalidLogin">
+                            <div class="alert alert-danger" role="alert">
+                            <strong>Invalid Login/Password</strong>
+                            </div>
+                        </div>
                         <form>
                         <div class="input-group">
                             <span class="input-group-addon">
@@ -62,7 +67,7 @@
                              
                         </div>
                     </div>
-                    <div ng-show="nbp2pChatBody" class="panel-body" id="nb_gc_body">
+                    <div ng-show="nbp2pChatBody" class="panel-body" id="nb_p2p_body">
                         <div id="p2p_chat_body" class="nb-chat-body"></div>
                         <form ng-submit="p2pChatSend()">
                             <div id="broadcastP2pChat" class="nb-broadcast-style"></div>

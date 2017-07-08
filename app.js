@@ -205,9 +205,11 @@ app.post('/signup/createuser', (req, res, next)=>{
 
 //API for signing in
 app.put('/users/signin', (req, res, next)=>{
-    console.log(req.body.userEmail);
+    console.log('called');
     userModel.findOne({userEmail: req.body.userEmail}, (err, user)=>{
-        bcrypt.compare(req.body.userPass, user.userPass, (err, result)=>{
+        if (user) {
+            console.log('called2');
+            bcrypt.compare(req.body.userPass, user.userPass, (error, result)=>{
             if (result) {
                 var token = jwt.encode(user, JWT_SECRET);
                 return res.json({token: token, userFirstName: user.userFirstName});
@@ -215,7 +217,13 @@ app.put('/users/signin', (req, res, next)=>{
             else {
                 return res.status(400).send();
             }
-        });
+            });
+        }
+        else {
+            console.log('error');
+            console.log(err);
+            return res.status(400).send();
+        }
     });
 });
 

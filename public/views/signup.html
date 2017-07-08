@@ -4,7 +4,7 @@
         <div class="panel-title">Sign up here!</div>
     </div>
     <div class="panel-body">
-        <form id="signupForm" name="signupForm">
+        <form id="signupForm" name="signupForm" ng-show="signupShow">
             <div class="row">
                 <div class="form-group" ng-class="{'has-error' : (signupForm.nb_signup_firstname.$invalid && !signupForm.nb_signup_firstname.$pristine)}">
                     <label for="nb_signup_firstname" class="col-md-3 nb-control nb-f-thick control-label">First Name</label>
@@ -64,6 +64,13 @@
         <button class="btn btn-primary" ng-click="nbNewUserSubmit()">Sign Up</button>
         </form>
         
+        <div id="signupAlert">
+        
+        </div>
+        <br>
+        <div ng-show="!signupShow">
+            <button ng-click="gotoPage('/')" class="btn btn-primary">Login here!</button>
+        </div>
     </div>
 </div>
 </div>

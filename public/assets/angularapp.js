@@ -36,7 +36,8 @@ nodebook.run(["$rootScope", "$cookies", function($rootScope, $cookies){
 }]);
 
 //Defining the nbController
-nodebook.controller('nbController', ["$scope", "$http", "$cookies", "$rootScope", function($scope, $http, $cookies, $rootScope){
+nodebook.controller('nbController', ["$scope", "$http", "$cookies", "$rootScope", "$compile", function($scope, $http, $cookies, $rootScope, $compile){
+    $scope.signupShow = true;
     $scope.getCurrentUser = function(){
         //HTTP PUT request to get current user First Name from the token
         $http.put('/currentuser', {}, {headers: {
@@ -45,7 +46,6 @@ nodebook.controller('nbController', ["$scope", "$http", "$cookies", "$rootScope"
                         $cookies.put('cun', res.data.userFirstName);
                         $scope.currentUserFirstName = res.data.userFirstName;
                     });
-                    
     };
     //Invoking the getCurrentUser function to retrieve the userFirsName from Token
     $scope.getCurrentUser();
@@ -110,12 +110,12 @@ nodebook.controller('nbController', ["$scope", "$http", "$cookies", "$rootScope"
 
     //Function that shows private chat body when invoked
     $scope.nbp2pMaximize = function(){
-        $scope.p2p_chat_body = true;
+        $scope.nbp2pChatBody = true;
     };
 
     //Function that hides private chat body when invoked
     $scope.nbp2pMinimize = function(){
-        $scope.p2p_chat_body = false;
+        $scope.nbp2pChatBody = false;
     };    
 
     //Web Sockets
@@ -148,14 +148,19 @@ nodebook.controller('nbController', ["$scope", "$http", "$cookies", "$rootScope"
             //Add the user name with whom the user is going to chat and icons to minimize, maximize and close
             angular.element('#p2pChatTitle').html(
             data.initiator + 
-            '<span class="glyphicon glyphicon-remove nb-right" ng-click="nbp2pClose()"></span> <span class="fa fa-window-maximize nb-right nb-padding-minus" ng-click="nbp2pMaximize()" ></span> <span class="glyphicon glyphicon-minus nb-right nb-padding-minus" ng-click="nbp2pMinimize()" ></span>'
+            '<span id="nbp2pClose" class="glyphicon glyphicon-remove nb-right" ng-click="nbp2pClose()"></span> <span class="fa fa-window-maximize nb-right nb-padding-minus" ng-click="nbp2pMaximize()" ></span> <span class="glyphicon glyphicon-minus nb-right nb-padding-minus" ng-click="nbp2pMinimize()" ></span>'
         );
-
+            
+           
+            
             //Event emitter to join a separate room
             socket.emit('p2ptargetjoin', {room: data.room});
             $scope.p2proom = data.room;
+
         }
-        
+
+        //$scope.$apply('#p2pChatTitle');
+        $compile(angular.element('#p2pChatTitle'))($scope);        
     });
 
     //Event listener when message is getting exchanged between two users
@@ -172,14 +177,16 @@ nodebook.controller('nbController', ["$scope", "$http", "$cookies", "$rootScope"
 
     //Function to be executed when user hits the send button in chat window
     $scope.p2pChatSend = function(){
-        
+        //Checking if message is entered
+        if($scope.p2pChatMsg != null){
         //Event emitter for one of the users sent a message
         socket.emit('p2pChatSend', {
             room: $scope.p2proom,
             message: $scope.p2pChatMsg,
-            handle: $cookies.get('cun')
+            handle: $scope.currentUserFirstName //$cookies.get('cun')
         });
         $scope.p2pChatMsg = '';
+    }
     };
 
     //Function to be executed when user submits a new note
@@ -243,7 +250,10 @@ nodebook.controller('nbController', ["$scope", "$http", "$cookies", "$rootScope"
 
     //Function that executes when user clicks sign in button
     $scope.signIn = function(){
-
+        if($scope.username == null || $scope.password == null){
+            $scope.invalidLogin = true;
+        }
+        else{
         //Storing the current username in local storage
         localStorage.setItem("cu", $scope.username);
 
@@ -255,9 +265,13 @@ nodebook.controller('nbController', ["$scope", "$http", "$cookies", "$rootScope"
                 $rootScope.token = res.data.token;
                 $rootScope.userFirstName = res.data.userFirstName;
                 $rootScope.currentUser = $scope.username;
+                $scope.getCurrentUser();
+                $scope.invalidLogin = false;
             }, function(err){
-                alert('Invalid username/password, Error: '+ err);
-            })
+                $scope.invalidLogin = true;
+            });
+        }
+        
     };
 
     //Function that validates the user by checking if current user is author of note displayed
@@ -313,9 +327,19 @@ nodebook.controller('nbController', ["$scope", "$http", "$cookies", "$rootScope"
 
 nodebook.controller('signupController',["$scope", "$http", "$rootScope", function($scope, $http, $rootScope){
     
+    $scope.signupShow = true;
+    $rootScope.gotoPage = function(url){
+        location.href = url;
+    }
+    
     //Function invoked when new user submits information to sign up
     $scope.nbNewUserSubmit = function(){
-        var newUser = {
+        if($scope.signupForm.$invalid){
+            angular.element('#signupAlert').html('<hr><div class="alert alert-danger" role="alert"><strong>Oh snap!</strong> Fill the required fields and try submitting again.</div>');
+        }
+
+        else {
+            var newUser = {
             'userFirstName': $scope.nbSuFirstName,
             'userLastName': $scope.nbSuLastName,
             'userName': $scope.nbNewUser,
@@ -323,9 +347,16 @@ nodebook.controller('signupController',["$scope", "$http", "$rootScope", functio
             'userPass': $scope.nbNewPass
         }
         $http.post('/signup/createuser', newUser).then(function(data){
-            // console.log(data);
+            $scope.signupShow = false;
+            angular.element('#signupAlert').html('<div class="alert alert-success" role="alert"><strong>Well done!</strong> You successfully signed up.</div>');
+            
         });
-    }
+
+        }
+
+        
+    };
+
 
     //Validating the new user username. If it is available or not
     $scope.validateUsername = function() {
