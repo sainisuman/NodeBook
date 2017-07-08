@@ -12,28 +12,34 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 
-// server.listen(process.env.PORT || 3000);
-
+//Event listener when socket connection is established
 io.on("connection", function(socket){
-    // console.log(socket.handshake.headers);
+    
     console.log('New Client connected');
+
+    //Event listener for groupChat event
     socket.on('groupChat', function(data){
         io.sockets.emit('groupChat', data);
     });
 
+    //Event listener when someone is typing a message in group chat
     socket.on('typing', function(data){
         socket.broadcast.emit('typing', data);
     });
 
+    //Event listener for private chat request
     socket.on('p2pChat', function(data){
         
+        //Decoding the chat initiator details
         var initiator = jwt.decode(data.cu, JWT_SECRET);
         
-        // var room = data.tu + initiator._id;
-         var room = 'abc';
-        console.log('User joined')
+        //Creating a room
+        var room = 'abc';
+
+        //Joining the room
         socket.join(room);
 
+        //Finding the target user by ID
         userModel.findById(data.tu, function(err, target){
             if(err) throw err;
             io.sockets.emit('p2pconnect', {room: room, targeter: target.userEmail ,initiator: initiator.userFirstName});
@@ -42,6 +48,7 @@ io.on("connection", function(socket){
         
     });
 
+    //Event listener to join the target user in the room created by chat initiator
     socket.on('p2ptargetjoin', function(data){
         console.log('Target joined room '+ data.room);
         socket.join(data.room);
@@ -51,6 +58,7 @@ io.on("connection", function(socket){
         console.log(clients);
     });
 
+    //Event listener when messages are being transferred
     socket.on('p2pChatSend', function(data){
         console.log(data);
         io.sockets.in('abc').emit('p2pmessage', {message: data.message, handle: data.handle});
@@ -59,6 +67,7 @@ io.on("connection", function(socket){
 
 var port = process.env.PORT || 3000;
 
+//Creating a secret variable for JWT token
 var JWT_SECRET = 'maverick';
 
 var urlencodedParser = bodyparser.urlencoded({ extended: false });
@@ -68,6 +77,7 @@ var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 
 
 var mongodbUri = 'mongodb://admin:sskssk@ds131432.mlab.com:31432/nodebook';
 
+//Connecting to mongoDB
 mongoose.connect(mongodbUri, options);
 
 /*var noteOne = noteModel({ noteText: 'Learn React'})
@@ -81,13 +91,13 @@ mongoose.connect(mongodbUri, options);
 //                 console.log('User saved');
 // });
 
-
-var notes = ['Make MEAN app', 'Learn React', 'Going to movies'];
-
+//Using Body parser middleware
 app.use(bodyparser.json());
 
+//Defining the static files folder
 app.use(express.static(path.join(__dirname, '/public')));
 
+//Creating a middleware to decode the user from token
 var authorized = function(req, res, next){
     var token = req.headers.authorization;
     var user = jwt.decode(token, JWT_SECRET);
@@ -95,14 +105,17 @@ var authorized = function(req, res, next){
     return next();
 };
 
+//Getting port number
 app.get('port', (req, res)=>{
     res.send(listener.address().port);
 });
 
+//Sending home page
 app.get('/', (req, res)=>{
     res.sendFile(__dirname + '/index.html');
 });
 
+//API to send the notes from Database upon request
 app.get('/notes', (req, res, next)=>{
     noteModel
     .find({})
@@ -114,6 +127,7 @@ app.get('/notes', (req, res, next)=>{
     //res.send(notes);
 });
 
+//API to send list of all users
 app.get('/users', (req, res, next)=>{
     userModel
     .find({})
@@ -131,6 +145,7 @@ app.post('/chat' ,(req, res, next)=>{
         res.send({}); // Sends entire note object    
 })
 
+//API to post new notes
 app.post('/notes', authorized ,(req, res, next)=>{
     // var token = req.headers.authorization;
     // var user = jwt.decode(token, JWT_SECRET);
@@ -146,10 +161,12 @@ app.post('/notes', authorized ,(req, res, next)=>{
     
 });
 
+//API to send the username of the user requesting
 app.put('/currentuser', authorized, (req, res, next)=>{
     res.send(req.user);
 });
 
+//API to delete note
 app.delete('/note/:id', (req, res, next)=>{
     //console.log(req.params.id);
     noteModel.findByIdAndRemove(req.params.id, (err, data)=>{
@@ -160,6 +177,7 @@ app.delete('/note/:id', (req, res, next)=>{
     res.send('Item Deleted');
 });
 
+//API to check if user exists
 app.put('/checkuser/:username', (req, res, next)=>{
     userModel.findOne({userName: req.params.username}, function(err, user){
         if(err) throw err;
@@ -168,6 +186,7 @@ app.put('/checkuser/:username', (req, res, next)=>{
     })
 });
 
+//API to signup a neew user
 app.post('/signup/createuser', (req, res, next)=>{
     // bcrypt.genSalt(10, (err, salt)=>{
         bcrypt.hash(req.body.userPass, 10, (err, hash)=>{
@@ -184,6 +203,7 @@ app.post('/signup/createuser', (req, res, next)=>{
     // });    
 });
 
+//API for signing in
 app.put('/users/signin', (req, res, next)=>{
     console.log(req.body.userEmail);
     userModel.findOne({userEmail: req.body.userEmail}, (err, user)=>{
@@ -199,9 +219,11 @@ app.put('/users/signin', (req, res, next)=>{
     });
 });
 
+
 app.put('/chat', (req, res, next)=>{
     console.log('lk');
 });
+
 
 app.get('*', (req, res, next)=>{
     return res.redirect('/#'+ req.originalUrl);
